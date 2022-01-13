@@ -207,7 +207,7 @@ const AddtoCartPage = (props) => {
                     <Image
                       source={{
                         uri:
-                        'http://shanya.myviristore.com/admin/' + selectedProductData.product_image,
+                        'https://shanya.ca/admin/' + selectedProductData.product_image,
                       }}
                       style={styles.trendingImageStyle}
                     />

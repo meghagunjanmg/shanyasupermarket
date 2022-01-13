@@ -36,7 +36,7 @@ const PromocodeScreen = (props) => {
           redirect: 'follow'
         };
 
-        fetch("http://shanya.myviristore.com/admin/api/couponlist", requestOptions)
+        fetch("https://shanya.ca/admin/api/couponlist", requestOptions)
           .then(response => response.json())
           .then(async result => {
             if(result.status!=0)
@@ -78,7 +78,7 @@ const PromocodeScreen = (props) => {
           redirect: 'follow'
         };
 
-        fetch("http://shanya.myviristore.com/admin/api/apply_coupon", requestOptions)
+        fetch("https://shanya.ca/admin/api/apply_coupon", requestOptions)
           .then(response => response.json())
           .then(async result => {
               console.log(result.data.coupon_discount)

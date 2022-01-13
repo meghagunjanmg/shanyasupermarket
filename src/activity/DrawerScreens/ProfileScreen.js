@@ -9,7 +9,8 @@ import { StyleSheet,
   TouchableOpacity,
   Switch, 
   SafeAreaView,
-  Alert
+  Alert,
+  ToastAndroid
  } from "react-native";
 import { SimpleLineIcons, Entypo, FontAwesome, MaterialIcons} from '@expo/vector-icons'; 
 import {connect} from "react-redux";
@@ -71,7 +72,7 @@ const ProfileScren = (props) => {
       redirect: 'follow'
     };
     
-     await fetch("http://shanya.myviristore.com/admin/api/profile_edit", requestOptions)
+     await fetch("https://shanya.ca/admin/api/profile_edit", requestOptions)
       .then(response => response.json())
       .then( async (result) => {
         const temp = props.item.userdata;
@@ -83,6 +84,7 @@ const ProfileScren = (props) => {
           console.log("user data updated")
           await props.updateUserdetails(temp);
           await Toast.show("User data updated!!")
+          
           setLoading(false);
           props.navigation.replace("DrawerNavigationRoutes")
       }
@@ -91,6 +93,45 @@ const ProfileScren = (props) => {
         console.log('error', error)
         Toast.show("We are encountring error while updating data!!");
         setLoading(false);
+      });
+
+  }
+
+  const getNewData = () =>
+  { 
+    let dataToSend = {user_id: props.item.userdata.user_id};
+  let formBody = [];
+  for (let key in dataToSend) {
+    let encodedKey = encodeURIComponent(key);
+    let encodedValue = encodeURIComponent(dataToSend[key]);
+    formBody.push(encodedKey + '=' + encodedValue);
+  }
+  formBody = formBody.join('&');
+
+
+    fetch('https://shanya.ca/admin/api/myprofile', {
+      method: 'POST',
+      body: formBody,
+      headers: {
+        //Header Defination
+        'Content-Type':
+        'application/x-www-form-urlencoded;charset=UTF-8',
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        //Hide Loader
+        // If server response message same as Data Matched
+        if (responseJson.status === '1') {
+          props.getUserData(responseJson.data);
+        } else {
+          setErrortext(responseJson.message);
+          console.log('Please check your email id or password');
+        }
+      })
+      .catch((error) => {
+        //Hide Loader
+        console.error(error);
       });
 
   }
@@ -117,7 +158,7 @@ const ProfileScren = (props) => {
       redirect: 'follow'
     };
 
-    fetch("http://shanya.myviristore.com/admin/api/updatenotifyby", requestOptions)
+    fetch("https://shanya.ca/admin/api/updatenotifyby", requestOptions)
       .then(response => response.text())
       .then(result => {
         console.log(result)
@@ -311,6 +352,23 @@ const ProfileScren = (props) => {
                       </View>
                       
                   </View>
+                 
+                     <TouchableOpacity 
+                    onPress={() => props.navigation.push("AddressScreen")}
+                    style={{
+                      backgroundColor: '#ffffff',
+                      borderWidth: 0,
+                      color: '#FFFFFF',
+                      borderColor: '#7DE24E',
+                      height: 40,
+                      flexDirection: 'row',
+                      borderRadius: 10,
+                      marginTop: 20,
+                      margin: 10,
+                  }} >
+                    <Text style={styles.buttonTextStyle1}>My Addresses</Text>
+                  </TouchableOpacity>
+  
                   {showButton?<TouchableOpacity style={{
                       backgroundColor: '#238A02',
                       borderWidth: 0,
@@ -330,22 +388,6 @@ const ProfileScren = (props) => {
                       <Text style={styles.buttonTextStyle}>SAVE PROFILE</Text>
                   </TouchableOpacity>:
                   <View></View>}
-                     <TouchableOpacity 
-                    onPress={() => props.navigation.push("AddressScreen")}
-                    style={{
-                      backgroundColor: '#ffffff',
-                      borderWidth: 0,
-                      color: '#FFFFFF',
-                      borderColor: '#7DE24E',
-                      height: 40,
-                      flexDirection: 'row',
-                      borderRadius: 10,
-                      marginTop: 20,
-                      margin: 10,
-                  }} >
-                    <Text style={styles.buttonTextStyle1}>My Addresses</Text>
-                  </TouchableOpacity>
-  
                   <TouchableOpacity 
                     onPress={() => props.navigation.navigate("Auth")}
                     style={{

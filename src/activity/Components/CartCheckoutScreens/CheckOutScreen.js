@@ -45,7 +45,7 @@ const CheckOutScreen = (props) => {
       redirect: 'follow'
     };
     
-    await fetch("http://shanya.myviristore.com/admin/api/timeslot", requestOptions)
+    await fetch("https://shanya.ca/admin/api/timeslot", requestOptions)
       .then(response => response.json())
       .then(result => {
             var tempArray=[];
@@ -138,7 +138,7 @@ const CheckOutScreen = (props) => {
                                           <Image
                                             source={{
                                               uri:
-                                                'http://shanya.myviristore.com/admin/' + item.product_image,
+                                                'https://shanya.ca/admin/' + item.product_image,
                                             }}
                                             style={styles.trendingImageStyle}
                                           />

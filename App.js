@@ -384,7 +384,7 @@ const App = (props) => {
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
-    console.log("TOKEN:", token);
+    console.log("TOKEN:", token.token);
   },
 
   // (required) Called when a remote is received or opened, or local notification is opened

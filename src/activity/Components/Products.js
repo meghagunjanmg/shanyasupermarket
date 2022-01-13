@@ -165,7 +165,7 @@ const Products = (props) => {
                           <Image
                             source={{
                               uri:
-                                'http://shanya.myviristore.com/admin/'  + productData.product_image,
+                                'https://shanya.ca/admin/'  + productData.product_image,
                             }}
                             style={styles.trendingImageStyle}
                           />  

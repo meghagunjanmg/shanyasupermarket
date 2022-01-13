@@ -27,7 +27,7 @@ const SearchScreen = (props) => {
     formBody = formBody.join('&');
     console.log(formBody);
 
-    fetch('http://shanya.myviristore.com/admin/api/search', 
+    fetch('https://shanya.ca/admin/api/search', 
     {
       method: 'POST',
       body: formBody,
