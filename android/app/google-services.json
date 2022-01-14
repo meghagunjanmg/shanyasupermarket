@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "765055637369",
-    "project_id": "viristorereactnative",
-    "storage_bucket": "viristorereactnative.appspot.com"
+    "project_number": "958632925592",
+    "project_id": "shanya-48a50",
+    "storage_bucket": "shanya-48a50.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:765055637369:android:ad3a0c131a8ec746e941a8",
+        "mobilesdk_app_id": "1:958632925592:android:d95da38ab9382e5648b3ed",
         "android_client_info": {
-          "package_name": "com.rohitbns.ViriStoreGroceryApp"
+          "package_name": "com.ShanyaSupermarketApp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "765055637369-op3ph8imp8itlkf7lc9pl82d98srs13a.apps.googleusercontent.com",
+          "client_id": "958632925592-rr9j8i319s4acjjk8hm1g4vb073g4dm5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAjU3laj0giWa_nWhDWlrAVUQxaTWhlUhE"
+          "current_key": "AIzaSyDYH8f9p3ymw3uTs1RJYQmKArvx3khkbVE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "765055637369-op3ph8imp8itlkf7lc9pl82d98srs13a.apps.googleusercontent.com",
+              "client_id": "958632925592-rr9j8i319s4acjjk8hm1g4vb073g4dm5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

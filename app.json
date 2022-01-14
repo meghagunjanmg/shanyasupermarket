@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ViriStoreGroceryApp",
-    "slug": "ViriStoreGroceryApp",
+    "name": "ShanyaSupermarketApp",
+    "slug": "ShanyaSupermarketApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,14 +20,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rohitbns.ViriStoreGroceryApp"
+      "bundleIdentifier": "com.ShanyaSupermarketApp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/app_icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.rohitbns.ViriStoreGroceryApp"
+      "package": "com.ShanyaSupermarketApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"

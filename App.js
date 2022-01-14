@@ -42,6 +42,7 @@ import DemoScreen from './src/activity/Components/DemoScreen';
 import { LogBox } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { colorsDark } from 'react-native-elements/dist/config';
+import { Toast } from 'popup-ui';
 LogBox.ignoreLogs(['Remote debugger']);
 LogBox.ignoreLogs(["Warning: Each", "Warning: Failed"]);
 // console.ignoredYellowBox = ["Warning: Each", "Warning: Failed"];
@@ -384,7 +385,7 @@ const App = (props) => {
 PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
-    console.log("TOKEN:", token.token);
+    console.log("TOKEN:", token);
   },
 
   // (required) Called when a remote is received or opened, or local notification is opened
@@ -426,6 +427,9 @@ PushNotification.configure({
     badge: true,
     sound: true,
   },
+  
+  
+
 
   // Should the initial notification be popped automatically
   // default: true
