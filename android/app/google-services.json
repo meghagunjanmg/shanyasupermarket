@@ -7,6 +7,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:958632925592:android:32c7cee3aa03f2a348b3ed",
+        "android_client_info": {
+          "package_name": "com.ShanyaSupermarket"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958632925592-rr9j8i319s4acjjk8hm1g4vb073g4dm5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYH8f9p3ymw3uTs1RJYQmKArvx3khkbVE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958632925592-rr9j8i319s4acjjk8hm1g4vb073g4dm5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:958632925592:android:d95da38ab9382e5648b3ed",
         "android_client_info": {
           "package_name": "com.ShanyaSupermarketApp"

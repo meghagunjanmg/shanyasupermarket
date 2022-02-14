@@ -171,7 +171,7 @@ const Products = (props) => {
                           />  
                           {productData.qty == 0
                           ?<TouchableOpacity 
-                              style={[styles.trendingParentView,{backgroundColor: '#238A02'}]} 
+                              style={[styles.trendingParentView,{groundColor: '#238A02'}]} 
                               onPress={() => quantityHandler('more', "" , productData.description,i)}>
                               <FontAwesome name="plus-circle" size={15} color="#FFFFFF"  />
                             </TouchableOpacity>
@@ -189,12 +189,16 @@ const Products = (props) => {
                             </TouchableOpacity>
                           </View> }
                           
-                          <Text style={{fontSize: 15, margin: 5, height: 25}}>{productData.product_name} </Text>
+                          <Text style={{fontSize: 15, margin: 5, height: 50}}>{productData.product_name} </Text>
                           <Text style={{ fontSize: 12, margin: 5, height: 20}}>{productData.varients[0].quantity} {productData.unit}</Text>
                           <Text style={{fontSize: 17, margin: 5,color:"black",fontWeight:"bold"}}>{props.item.currency_sign} {productData.price}</Text>
-                          <Text style={{ flex: 1, textAlign: "right",marginRight:5}}>
-                          <Text style={{textDecorationLine:"line-through"}}>{productData.mrp}</Text> <Text style={{textAlign: "right", color: 'green', fontSize: 12}}>C{productData.mrp - productData.price} Off</Text>
-                          </Text>
+                          {productData.mrp == productData.price ?
+          <View/>:<View style={{flex: 1}}>
+  <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
+      <Text style={{textDecorationLine:"line-through"}}>  {props.item.currency_sign}{productData.mrp}</Text>
+      <Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>  {props.item.currency_sign}{productData.mrp - productData.price} Off</Text>
+  </Text></View>}
+
                         </View>
                     </TouchableOpacity>
                   )

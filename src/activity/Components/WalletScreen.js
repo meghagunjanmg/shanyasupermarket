@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import {Text,StyleSheet, View, Image,TextInput,Alert} from 'react-native';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import CardButton from "./StripePaymentComponent/CardButton";
@@ -19,7 +19,30 @@ const WalletScreen = (props) => {
   var [country, setCountry] = useState("");
   var [paymentStatus, setPaymentStatus] = useState("");
   var [country, setCountry] = useState("");
+  var [wallet, setWallet] = useState(props.item.userdata.wallet);
+  
+  useEffect(() => {
+    var formdata = new FormData();
+    formdata.append("user_id",props.item.userdata.user_id );
 
+    var requestOptions = {
+      method: 'POST',
+      body: formdata,
+      redirect: 'follow'
+    };
+
+    fetch("https://shanya.ca/admin/api/myprofile", requestOptions)
+      .then(response => response.json())
+      .then(async result => {
+        console.log(result)
+        await props.getUserData(result.data)
+        setWallet(result.data.wallet)
+
+      })
+      .catch(error => console.log('error', error));
+    
+  }, [])
+  
   const getCountryLocation = () =>{
     fetch("https://maps.googleapis.com/maps/api/geocode/json?address=" + props.item.latitude + "," + props.item.longitude + "&key=" + "AIzaSyCKabiwGyic2E7QicGIz2Fs_D81DCnWb1Y")
           .then((response) => response.json())
@@ -195,7 +218,7 @@ const handleCheckOutAPI = (method, status) => {
                My Wallet Amount
             </Text>
             <Text style={styles.dollarvalue}>
-              {props.item.currency_sign} {props.item.userdata.wallet?props.item.userdata.wallet:props.item.userdata.wallet}
+              {props.item.currency_sign} {wallet}
             </Text>
         </View>
         <View > 

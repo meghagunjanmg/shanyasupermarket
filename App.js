@@ -1,6 +1,5 @@
 
 import 'react-native-gesture-handler';
-
 import React, {useEffect, useState} from 'react';
 import { createStackNavigator } from "@react-navigation/stack";
 
@@ -32,6 +31,8 @@ import AddtoCartPage from "./src/activity/Components/AddtoCartPage"
 import OrderDetailsScreen from "./src/activity/Components/OrderDetailsScreen.js"
 import OrderCancelPageScreen from "./src/activity/Components/OrderCancelPage.js";
 import DrawerNavigationRoutes from './src/activity/DrawerNavigatorRoutes';
+import MapComponent from './src/activity/MapComponent';
+
 import PromocodeScreen from './src/activity/Components/PromocodeScreen';
 import { TouchableOpacity } from 'react-native';
 import { Provider } from 'react-redux';
@@ -42,7 +43,6 @@ import DemoScreen from './src/activity/Components/DemoScreen';
 import { LogBox } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import { colorsDark } from 'react-native-elements/dist/config';
-import { Toast } from 'popup-ui';
 LogBox.ignoreLogs(['Remote debugger']);
 LogBox.ignoreLogs(["Warning: Each", "Warning: Failed"]);
 // console.ignoredYellowBox = ["Warning: Each", "Warning: Failed"];
@@ -64,7 +64,7 @@ const CartStackNavigator = ({navigation}) => {
               </TouchableOpacity>
             ), //Set Header right icon
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -84,7 +84,7 @@ const CheckOutScreenStackNavigator = () => {
           options={{
             title: 'CheckOut', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -104,7 +104,7 @@ const WalletStackNavigator = () => {
           options={{
             title: 'My Wallet', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -125,7 +125,7 @@ const OrderStackNavigator = () => {
           options={{
             title: 'My Orders', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -145,7 +145,7 @@ const RewardsScreenStackNavigator = () => {
           options={{
             title: 'My Rewards', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -165,7 +165,7 @@ const OrderCancelPageStackNavigator = () => {
           options={{
             title: 'Cancel Orders', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -185,7 +185,27 @@ const AddressScreenStackNavigator = () => {
           options={{
             title: 'Saved Address', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
+            },
+            headerTintColor: '#fff', //Set Header text color
+            headerTitleStyle: {
+              fontWeight: 'normal', //Set Header text style
+            },
+          }}
+        />
+      </Stack.Navigator>
+  );
+}
+const MapComponentStackNavigator = ({navigation}) => {
+    return (
+    <Stack.Navigator>
+        <Stack.Screen
+          name="MapComponent"
+          component={MapComponent}
+          options={{
+            title: 'Map', //Set Header Title
+            headerStyle: {
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -205,7 +225,7 @@ const ProfileStackNavigator = ({navigation}) => {
           options={{
             title: 'Profile', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -225,7 +245,7 @@ const PaymentOptionsStackNavigator = ({navigation}) => {
           options={{
             title: 'Payment Options', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -262,7 +282,7 @@ const ProductsStackNavigator = ({navigation}) => {
               </TouchableOpacity>
             ), //Set Header right icon
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -282,7 +302,7 @@ const PromocodeScreenStackNavigator = ({navigation}) => {
           options={{
             title: 'Coupons', //Set Header Title
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -348,7 +368,7 @@ const OrderDetailsStackNavigator = ({navigation}) => {
               </TouchableOpacity>
             ), //Set Header right icon
             headerStyle: {
-              backgroundColor: '#f2a900', //Set Header color
+              backgroundColor: '#238A02', //Set Header color
             },
             headerTintColor: '#fff', //Set Header text color
             headerTitleStyle: {
@@ -386,6 +406,7 @@ PushNotification.configure({
   // (optional) Called when Token is generated (iOS and Android)
   onRegister: function (token) {
     console.log("TOKEN:", token);
+    _storeData("token", token.token);
   },
 
   // (required) Called when a remote is received or opened, or local notification is opened
@@ -427,9 +448,6 @@ PushNotification.configure({
     badge: true,
     sound: true,
   },
-  
-  
-
 
   // Should the initial notification be popped automatically
   // default: true
@@ -448,6 +466,8 @@ PushNotification.configure({
 
 
   const readData = async () => {
+
+
     try {
       const value = await AsyncStorage.getItem('userId');
       if(value !== null){
@@ -460,9 +480,21 @@ PushNotification.configure({
     } catch (e) {
       console.log('Failed to fetch the data from storage');
     }
+
+    remove("lat")
+    remove("lng")
+    
   }
 
-  
+  const remove =async (key) =>{
+    try {
+        await AsyncStorage.removeItem(key);
+        return true;
+    }
+    catch(exception) {
+        return false;
+    }
+  }
     return (
       <Provider store={store}>
       <NavigationContainer>
@@ -534,6 +566,11 @@ PushNotification.configure({
             component={WalletStackNavigator}
             options={{headerShown: false}}
           />
+           <Stack.Screen
+            name="MapComponent"
+            component={MapComponentStackNavigator}
+            options={{headerShown: false}}
+          />
            {/* wallet navigator */}
            <Stack.Screen
             name="CartScreen"
@@ -550,6 +587,7 @@ PushNotification.configure({
             component={AddressScreenStackNavigator}
             options={{headerShown: false}}
           />
+         
           {/* Navigation Drawer as a landing page */}
           <Stack.Screen
             name="DrawerNavigationRoutes"
@@ -590,7 +628,7 @@ PushNotification.configure({
                 </TouchableOpacity>
               ), //Set Header right icon
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {
@@ -609,7 +647,7 @@ PushNotification.configure({
                 </TouchableOpacity>
               ), //Set Header right icon
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {
@@ -624,7 +662,7 @@ PushNotification.configure({
             options={{
               title: 'Payment Options', //Set Header Title
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {
@@ -639,7 +677,7 @@ PushNotification.configure({
             options={{
               title: 'Product', //Set Header Title
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {
@@ -654,7 +692,7 @@ PushNotification.configure({
             options={{
               title: 'Add or Update Address', //Set Header Title
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {
@@ -662,7 +700,7 @@ PushNotification.configure({
               },
             }}
           />
-  
+               
           {/* Add payment option page navigator */}
           {/* <Stack.Screen
             name="PaymentOptions"
@@ -670,7 +708,7 @@ PushNotification.configure({
             options={{
               title: 'Payment Options', //Set Header Title
               headerStyle: {
-                backgroundColor: '#f2a900', //Set Header color
+                backgroundColor: '#238A02', //Set Header color
               },
               headerTintColor: '#fff', //Set Header text color
               headerTitleStyle: {

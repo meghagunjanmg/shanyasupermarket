@@ -1,5 +1,7 @@
 import React, {useState, useEffect} from "react";
+import MapView, { Marker } from 'react-native-maps';
 import {StyleSheet, 
+  Dimensions,
   View,
   Text, 
   SafeAreaView, 
@@ -23,13 +25,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 import {_storeData, _retrieveData} from "../Storage";
 
 const Homescreen = (props) => {
-
   if(props.item.userdata.first_name !== undefined){
-    customTitle = `Welcome ${props.item.userdata.first_name} !!`;
+    customTitle = `Welcome ${props.item.userdata.first_name} !`;
   }
-  else   customTitle = `Welcome !!`;
+  else   customTitle = `Welcome !`;
 
   props.navigation.setOptions({title: customTitle})
+ 
 
   var [allProducts,changeAllProducts] = useState([]);
   var [errorMsg,changeErrorMsg] = useState("");
@@ -52,6 +54,7 @@ const Homescreen = (props) => {
   var [responseProductDataArray,changeResponseProductDataArray] = useState([]);
   var [cartItemsArray,changeCartItemsArray] = useState(props.item.cartItems);
   var [reload,setReload] = useState();
+  var [storeNumber,setStoreNumber] = useState("");
   var [plusButtons,changePlusButton] = useState(false);
   const [refreshPage, setRefreshPage] = useState("");
 
@@ -160,19 +163,22 @@ const Homescreen = (props) => {
   }
 
   useEffect(() => {
-
     // Update the user data
     console.log("checking in home page for user id");
     readUserData();
     console.log("checking in home page >>> ");
     _getLocationAsync();
+    //newloc()
     console.log(`Status is : -${props.item.homepageData.status}`);
     //props.navigation.replace('DrawerNavigationRoutes');
   }, [allProducts])
 
+
   const readUserData = async () => {
     try {
       const valueuserId = await AsyncStorage.getItem('userId');
+      storeNumber = await AsyncStorage.getItem('storeNumber');
+
       console.log("values of user id in homepage  >>> " + valueuserId); 
       if(valueuserId !== null){
         readUserDetails(valueuserId);
@@ -251,29 +257,62 @@ const Homescreen = (props) => {
       .catch(error => console.log('error', error));
   }
 
+  const remove =async (key) =>{
+    try {
+        await AsyncStorage.removeItem(key);
+        return true;
+    }
+    catch(exception) {
+        return false;
+    }
+  }
+
   _getLocationAsync = async () => {
     console.log("get lacation async called")
     let { status } = await Location.requestPermissionsAsync();
     if (status !== 'granted') 
     {
       changeLocationResult("Permission to access location was denied");
+      setError('Permission to access location was denied');
     }
-  
-    let location = await Location.getLastKnownPositionAsync({enableHighAccuracy: true });
-    
-    await props.getLocation(location.coords.latitude,location.coords.longitude);
-    // Center the map on the location we just fetched.
-    changeLongi(location.coords.longitude);
-    changeLati(location.coords.latitude);
-    // console.log(latitude);
-    changeErrorMsg(null);
-    _getHomePageDataAsync();
+
+    try {
+      const value1 = await AsyncStorage.getItem('lat');
+      const value2 = await AsyncStorage.getItem('lng');
+      if(value1 !== null){
+        changeLongi(value2);
+        changeLati(value1);
+        changeErrorMsg(null);
+   
+        _getHomePageDataAsync();   
+        //ToastAndroid.showWithGravityAndOffset("stored "+value1+" "+value2,ToastAndroid.LONG,ToastAndroid.BOTTOM,25,50);
+      }else {
+        let location = await Location.getLastKnownPositionAsync({enableHighAccuracy: true });
+        await props.getLocation(location.coords.latitude,location.coords.longitude);
+        // Center the map on the location we just fetched.
+        changeLongi(location.coords.longitude);
+        changeLati(location.coords.latitude);
+
+  remove("lat")
+  remove("lng")
+  console.log((location.coords.latitude));
+        _storeData("lat",location.coords.latitude+"");
+        _storeData("lng",location.coords.longitude+"");
+     
+       // ToastAndroid.showWithGravityAndOffset("current "+location.coords.latitude+" "+location.coords.longitude,ToastAndroid.LONG,ToastAndroid.BOTTOM,25,50);
+        changeErrorMsg(null);
+        _getHomePageDataAsync();
+      }
+    } catch (e) {
+      console.log('Failed to fetch the data from storage');
+    }  
   }
 
-  _getHomePageDataAsync = async () => {
-    console.log("get home page called")
-    console.log(latitude);
 
+  _getHomePageDataAsync = async () => {
+  
+    //ToastAndroid.showWithGravityAndOffset("API "+latitude+" "+longitude,ToastAndroid.LONG,ToastAndroid.BOTTOM,25,50);
+    
     let dataToSend = {lat: latitude, lng: longitude};
     let formBody = [];
     for (let key in dataToSend) {
@@ -294,6 +333,7 @@ const Homescreen = (props) => {
     })
       .then((response) => response.json())
       .then((responseJson) => {
+        _storeData("storeNumber",responseJson.store_number)
         if(responseJson.top_selling.length < 1 && responseJson.recentselling.length < 1 && responseJson.whats_new.length < 1)
         {
           changeResponseStatus(2);
@@ -393,7 +433,6 @@ const Homescreen = (props) => {
         console.error(error);
       });
     }
-
       _getProductDataAsync = async (catID, title,i) => {
         console.log("get product data called")
         new Promise((resolve) => {
@@ -417,11 +456,13 @@ const Homescreen = (props) => {
           })
             .then((response) => response.json())
             .then((responseJson) => {
+            
               let productResponseData = responseJson.data;
               productResponseData[0].parent_category_id = catID;
               productResponseData[0].parent_category_title = title;
               productResponseData.forEach(product => {product.qty = 0;});
               var tempArray = responseProductDataArray;
+              console.log(productResponseData)
               tempArray.push(productResponseData)
               changeResponseProductDataArray(tempArray);
               changeResponseStatusProduct(responseJson.status)
@@ -452,10 +493,9 @@ const Homescreen = (props) => {
             })
             .catch((error) => {
               changeloading(false);
-              console.error(error);
+              console.error(error+" ****" +latitude+" "+longitude);
             });
         }) 
-        
       }
 
       //change
@@ -585,12 +625,12 @@ const Homescreen = (props) => {
                                   <View style={{flex: 1}}>
                                     <Text style={{flex: 1, fontSize: 17, margin: 5,color:"black",fontWeight:"bold"}}>{props.item.currency_sign} {productData.price}</Text>
                                   </View>
-                                  <View style={{flex: 1}}>
-                                    <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}> 
-                                    <Text style={{textDecorationLine:"line-through"}}>{productData.mrp}</Text>
-                                      <Text style={{flex: 1, textAlign: "right", color: 'green', fontSize: 12}}>{props.item.currency_sign}{productData.mrp - productData.price} Off</Text>
-                                    </Text>
-                                  </View>
+                                  {productData.mrp == productData.price ?
+          <View/>:<View style={{flex: 1}}>
+  <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
+      <Text style={{textDecorationLine:"line-through"}}>  {props.item.currency_sign}{productData.mrp}</Text>
+      <Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>  {props.item.currency_sign}{productData.mrp - productData.price} Off</Text>
+  </Text></View>}
                               </View>
                           </TouchableOpacity>
                         )
@@ -772,11 +812,14 @@ const Homescreen = (props) => {
                                                 {props.item.currency_sign} {trendingItem.price}
                                             </Text>
                                           </View>
-                                          <View style={{flex: 1}}>
-                                            <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
-                                                <Text style={{textDecorationLine:"line-through"}}>{trendingItem.mrp} </Text><Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>{props.item.currency_sign}{trendingItem.mrp - trendingItem.price} Off</Text>
-                                            </Text>
-                                          </View>
+                                          {trendingItem.mrp == trendingItem.price ?
+          <View/>:<View style={{flex: 1}}>
+  <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
+      <Text style={{textDecorationLine:"line-through"}}>  {props.item.currency_sign}{trendingItem.mrp}</Text>
+      <Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>  {props.item.currency_sign}{trendingItem.mrp - trendingItem.price} Off</Text>
+  </Text></View>
+}
+                                     
                                         </View>
                                   </TouchableOpacity>
                                   )
@@ -839,11 +882,12 @@ const Homescreen = (props) => {
                                             {props.item.currency_sign} {featuredItem.price}
                                         </Text>
                                       </View>
-                                      <View style={{flex: 1}}>
-                                        <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
-                                        <Text style={{textDecorationLine:"line-through"}}>{featuredItem.mrp}</Text> <Text style={{flex: 1, textAlign: "right", color: 'green', fontSize: 12}}>{props.item.currency_sign}{featuredItem.mrp - featuredItem.price} Off</Text>
-                                        </Text>
-                                      </View>
+                                      {featuredItem.mrp == featuredItem.price ?
+          <View/>:<View style={{flex: 1}}>
+  <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
+      <Text style={{textDecorationLine:"line-through"}}>  {props.item.currency_sign}{featuredItem.mrp}</Text>
+      <Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>  {props.item.currency_sign}{featuredItem.mrp - featuredItem.price} Off</Text>
+  </Text></View>}
                                     </View>
                                 </TouchableOpacity>
                             )
@@ -902,12 +946,12 @@ const Homescreen = (props) => {
                                           {props.item.currency_sign}  {recommendedItem.price}
                                       </Text>
                                     </View>
-                                    <View style={{flex: 1}}>
-                                      <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
-                                      <Text style={{textDecorationLine:"line-through"}}>{recommendedItem.mrp}</Text>
-                                       <Text style={{flex: 1, textAlign: "right", color: 'green', fontSize: 12}}>{props.item.currency_sign}{recommendedItem.mrp - recommendedItem.price} Off</Text>
-                                      </Text>
-                                    </View>
+                                    {recommendedItem.mrp == recommendedItem.price ?
+          <View/>:<View style={{flex: 1}}>
+  <Text style={{flex: 1, textAlign: "right",paddingBottom:5,paddingRight:5}}>
+      <Text style={{textDecorationLine:"line-through"}}>  {props.item.currency_sign}{recommendedItem.mrp}</Text>
+      <Text style={{flex: 1,textAlign: "right", color: 'green', fontSize: 12}}>  {props.item.currency_sign}{recommendedItem.mrp - recommendedItem.price} Off</Text>
+  </Text></View>}
                                   </View>
                               </TouchableOpacity>
                             )
@@ -952,10 +996,10 @@ const Homescreen = (props) => {
               onPress={() =>{
                 let number = '';
                 if (Platform.OS === 'ios') {
-                number = 'telprompt:+919911966636';
+                number = 'telprompt:+91'+storeNumber;
                 }
-                else {
-                number = 'tel:+919911966636'; 
+                else {  
+                number = 'tel:+91'+storeNumber; 
                 }
                 Linking.openURL(number);
               }}
@@ -966,7 +1010,7 @@ const Homescreen = (props) => {
             {/* Whatsapp */}
             <TouchableOpacity 
               onPress={() => {
-                let url= "whatsapp://send&phone=919911966636"
+                let url= "whatsapp://send&phone=91"+storeNumber
                 Linking.openURL(url)
                 .then(data => {
                   console.log("WhatsApp Opened successfully " + data);  //<---Success
@@ -1029,29 +1073,37 @@ const Homescreen = (props) => {
   {
     return(
       <SafeAreaView style={styles.noItemsContainer}>
-        <View style={styles.items}>
-            <Text style={styles.itemstext}>
-              We are not delivering in this Area.
-            </Text>
-          </View>
-          
-          <View style={styles.rechargebutton}> 
-            <TouchableOpacity>
-              <Text style={styles.textRecharge}>CHANGE YOUR LOCATION</Text>
-            </TouchableOpacity>
+      <View style={styles.items}>
+          <Text style={styles.itemstext}>
+            We are not delivering in this Area.
+          </Text>
         </View>
-      </SafeAreaView>
+        
+        <View style={styles.rechargebutton}> 
+          <TouchableOpacity onPress={() => {
+            console.log(latitude+" "+longitude)
+            try {
+              navigation.navigate('MapComponent', {screen: "MapComponent", params: {latitude:latitude,longitude:longitude}})
+            } catch (error) {
+              console.log(error)
+            }
+          }}
+>
+            <Text style={styles.textRecharge}>CHANGE YOUR LOCATION</Text>
+          </TouchableOpacity>
+      </View>
+    </SafeAreaView>
     );
   }
   else{
-    return (<View>
-        <Text style={{textAlign:"center",width:"90%",marginLeft:"auto",marginRight:"auto",marginTop:300,color:"grey"}}>We are unable to connect to our service, Please check your Internet Connection or try again later!!</Text>
-        {/* {_getHomePageDataAsync()} */}
-      </View>
+    return (
+    <View><Text style={{textAlign:"center",width:"90%",marginLeft:"auto",marginRight:"auto",marginTop:300,color:"grey"}}>We are unable to connect to our service, Please check your Internet Connection or try again later!!</Text>{/* {_getHomePageDataAsync()} */}</View>
+
     )
   }
   
 }
+
 const mapStateToProps = (state) => {
   // console.log("State Contains:-"+ state)
   // console.log(`Map State to props:- ${state.item.homepageData.status}`)
@@ -1066,6 +1118,16 @@ export default connect(mapStateToProps, {getItems,getLocation,updatedCart,getHom
 // export default HomeScreen;
 
 const styles = StyleSheet.create({
+  map: {
+    width: Dimensions.get('screen').width,
+    height: Dimensions.get('screen').height * 0.90,
+},
+heading: {
+  alignSelf: 'center',
+  paddingTop: 20,
+  marginBottom: 10,
+  fontSize: 24
+},
   container:{
     flex:1,
     backgroundColor:'#F2EDED',

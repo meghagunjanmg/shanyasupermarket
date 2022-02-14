@@ -20,14 +20,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ShanyaSupermarketApp"
+      "bundleIdentifier": "com.ShanyaSupermarket"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/app_icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.ShanyaSupermarketApp"
+      "package": "com.ShanyaSupermarket"
     },
     "web": {
       "favicon": "./assets/favicon.png"

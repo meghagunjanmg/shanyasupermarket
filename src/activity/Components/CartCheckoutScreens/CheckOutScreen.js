@@ -86,6 +86,13 @@ const CheckOutScreen = (props) => {
 	    }
 	    return 0;
 	}
+  const TaxesPrice = () => {
+		// const { cartItems } = cartItems;
+		if(cartItemsArray){
+			return cartItemsArray.reduce((sum, item) => sum + (item.qty * ((item.gst*item.price)/100+(item.hst*item.price)/100)), 0 );
+		}
+		return 0;
+	}
     if(props.item.userdata.user_id === undefined)
     {
         return(<View>{props.navigation.navigate("Auth")}</View>)
@@ -262,7 +269,7 @@ const CheckOutScreen = (props) => {
                 <View style={{flexDirection:"row",position:"relative",bottom:0,marginTop:7,marginBottom:7,backgroundColor:"white"}}>
                     <View style={{flex:2,borderRadius:10}}>
                         <Text style={{marginLeft:10,fontWeight:"bold",fontSize:15}}>Price Detail's</Text>
-                        <Text style={{marginLeft:10,fontWeight:"bold",fontSize:15,color:"grey"}}>{props.item.currency_sign} {(subtotalPrice()+20.00).toFixed(2)}</Text>
+                        <Text style={{marginLeft:10,fontWeight:"bold",fontSize:15,color:"grey"}}>{props.item.currency_sign} {(subtotalPrice()+TaxesPrice()+20.00).toFixed(2)}</Text>
                     </View>
                     <TouchableOpacity 
                         onPress={()=> 

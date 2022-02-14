@@ -8,7 +8,8 @@ import RadioForm, {RadioButton, RadioButtonInput, RadioButtonLabel} from "react-
 import Constants from '../Components/Constants';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Toast from 'react-native-simple-toast';
-
+import { sub } from 'react-native-reanimated';
+var subT=0;
 const Cart = (props) => {
   var [selectAll,changeSelectAll] = useState(false);
   var [couponCodeData,setCouponCodeData] = useState(props.item.couponDiscount);
@@ -25,8 +26,16 @@ const Cart = (props) => {
   var [value,changeRadioValue] = useState("08:00 - 10:00");
   var [newCartArray,changeNewCartArray] = useState([]);
   var [deliveryInstruction,setDeliveryInstruction] = useState("");
+  var [addresss,setAddress] = useState("");
   var [showDeliveryInstructionButton,setShowDeliveryInstructionButton] = useState(true);
   var [showGreenTick,setShowGreenTick] = useState(false);
+  var [rewardsv,setRewardsV] = useState("");
+  var [rewardsval,setRewardsVal] = useState("");
+
+
+  var [s,setS] = useState(0);
+
+
   var [radio_props,changeRadioProps] = useState([
       // {label: '08:00 - 10:00', value: "08:00 - 10:00" },
       // {label: '10:00 - 13:00', value: "10:00 - 13:00" },
@@ -35,15 +44,73 @@ const Cart = (props) => {
       // {label: '19:00 - 22:00', value: "19:00 - 22:00" }
   ]);
   useEffect(() => {
-    // Update the user data
-    console.log("props.item.top_selling");
-    console.log(props.item.homepageData.recent_selling[0].store_id);
-    var currentDate = new Date();
-    var choosenDate=`${currentDate.getFullYear()}-${('0' + (currentDate.getMonth()+1)).slice(-2)}-${('0' + (currentDate.getDate())).slice(-2)}`;
-    _getTimings(choosenDate);
-    _getUserDetails();
-    
-  }, [])
+  
+       // Update the user data
+       console.log("props.item.top_selling");
+       console.log(props.item.homepageData.recent_selling[0].store_id);
+       var currentDate = new Date();
+       var choosenDate=`${currentDate.getFullYear()}-${('0' + (currentDate.getMonth()+1)).slice(-2)}-${('0' + (currentDate.getDate())).slice(-2)}`;
+       _getTimings(choosenDate);
+       _getUserDetails();
+   
+       getrewardvalue();
+   
+       if (rewardsValue*rewardsv>=subtotalPrice()) {
+              console.log("Reward amount **")
+              setRewardsValue(subtotalPrice())
+            } else {
+             //console.log("Reward amount ")
+             setRewardsValue(rewardsValue*rewardsv)
+            }
+     }, [])
+
+   
+  const getrewardvalue = () => {
+
+    var requestOptions = {
+      method: 'GET',
+      redirect: 'follow'
+    };
+
+    fetch("https://shanya.ca/admin/api/rewardvalues", requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === '1'){
+         setRewardsV(result.data.value)
+        
+        }else{
+          console.log('Please check your API.. ' + result.message);
+        }
+      })
+      .catch(error => console.log('error', error));
+  }
+
+
+
+  const userReward = () => {
+
+    var formdata1 = new FormData();
+    formdata1.append("user_id", props.item.userdata.user_id);
+    formdata1.append("cart_id", props.item.storeId);
+
+    var requestOptions = {
+      method: 'POST',
+      body: formdata1,
+      redirect: 'follow'
+    };
+    fetch("https://shanya.ca/admin/api/usereward", requestOptions)
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === '1'){
+         setRewardsV(result.data.value)
+       
+        }else{
+          console.log('Please check your API.. ' + result.message);
+        }
+      })
+      .catch(error => console.log('error', error));
+  }
+
 
   const _getUserDetails = () => {
       var formdata1 = new FormData();
@@ -61,6 +128,17 @@ const Cart = (props) => {
         .then(result => {
           if (result.status === '1'){
             props.getUserAddress(result.data);
+            var item;
+            result.data.forEach(
+              function(item){
+                console.log(item);
+                if(item.select_status === 1)
+          {
+            var ad = (item.house_no+","+item.society+","+item.city+","+item.state+","+item.pincode).replace("undefined","").replace(",,",",")
+            setAddress(""+ad)
+          }
+               }
+            )
           }else{
             setErrortext(result.message);
             console.log('Please check your API.. ' + result.message);
@@ -138,6 +216,13 @@ const Cart = (props) => {
 		}
 		return 0;
 	}
+  const TaxesPrice = () => {
+		// const { cartItems } = cartItems;
+		if(cartItemsArray){
+			return cartItemsArray.reduce((sum, item) => sum + (item.qty * ((item.gst*item.price)/100+(item.hst*item.price)/100)), 0 );
+		}
+		return 0;
+	}
 	
     const navigation = props.navigation;
 		const styles = StyleSheet.create({
@@ -161,7 +246,7 @@ const Cart = (props) => {
         .then(result => {
           console.log(result);
           if(result.status == 0){
-            Toast.show(result.message + " Please select future date for delivery date.");
+            //Toast.show(result.message + " Please select future date for delivery date.");
           }else{
             var tempArray=[];
             result.data.map(time => {
@@ -216,6 +301,14 @@ const Cart = (props) => {
 				) : (
 					<ScrollView>	
 						{cartItemsArray && cartItemsArray.map((item, i) => {
+              var taxtype;
+              console.log(item.gst+" "+item.hst)
+              if(item.gst==0){
+                  taxtype = "H"
+              }
+              if(item.hst==0){
+                taxtype = "G"
+            }
               return(
 							<View key={i} style={{flexDirection: 'row', backgroundColor: '#fff', marginBottom: 5,width:"95%",marginLeft:"auto",marginRight:"auto",borderRadius:10}}>
 								
@@ -228,7 +321,8 @@ const Cart = (props) => {
 								  		<Text  >{item.product_name}</Text>
                       <Text  >{item.varients[0].quantity} {item.unit}</Text>
 								  		<Text  >{item.description ? item.description : ''}</Text>
-                      <Text  >${item.qty * item.price}</Text>
+                      <Text  >${item.qty * item.price} {taxtype}</Text>
+                     
 								  	</View>
 								  </View>
                 </View>
@@ -262,18 +356,20 @@ const Cart = (props) => {
                   <Text>Number of Cart Items ( {cartItemsArray.length} )</Text>
                   <View style={{flexDirection:"row",marginTop:7,marginBottom:10,width:"98%",marginLeft:"auto",marginRight:"auto"}}>
                       <View style={{marginTop:10,marginBottom:10,width:"50%"}}>
-                        <Text style={{color:"black"}}>Order Amount:-</Text>
-                        <Text style={{color:"black"}}>Rewards Applied:-</Text>
-                        <Text style={{color:"black"}}>Coupon Discount:-</Text>
-                        <Text style={{color:"black"}}>Delivery Charges:-</Text>
-                        <Text style={{color:"black",marginTop:2}}>Total Payable Amount:-</Text>
+                        <Text style={{color:"black"}}>Order Amount</Text>
+                        <Text style={{color:"black"}}>Rewards Applied</Text>
+                        <Text style={{color:"black"}}>Coupon Discount</Text>
+                        <Text style={{color:"black"}}>Taxes</Text>
+                        <Text style={{color:"black"}}>Delivery Charges</Text>
+                        <Text style={{color:"black",marginTop:2}}>Total Payable Amount</Text>
                       </View>
                       <View style={{marginTop:10,marginBottom:10,alignItems:"flex-end",width:"50%"}}>
                         <Text style={{color:"#7f7f7f"}}>{props.item.currency_sign}{subtotalPrice().toFixed(2)}</Text>
-                        <Text style={{color:"#7f7f7f"}}>{props.item.currency_sign}{rewardsValue.toFixed(2)}</Text>
+                        <Text style={{color:"#7f7f7f"}}>{props.item.currency_sign}{rewardsValue}</Text>
                         <Text style={{color:"#7f7f7f"}}>{props.item.currency_sign}{couponCodeData.discount.toFixed(2)}</Text>
+                        <Text style={{color:"#7f7f7f"}}>{props.item.currency_sign}{TaxesPrice().toFixed(2)}</Text>
                         <Text style={{color:"#7f7f7f",borderBottomColor:"grey",borderBottomWidth:1}}>{props.item.currency_sign}{props.item.deliveryData.del_charge}.00</Text>
-                        <Text style={{color:"#7f7f7f",marginTop:2}}>{props.item.currency_sign}{(subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue).toFixed(2)}</Text>
+                        <Text style={{color:"#7f7f7f",marginTop:2}}>{props.item.currency_sign}{(subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue+TaxesPrice()).toFixed(2)}</Text>
                       </View>
                   </View>
               </View>
@@ -282,7 +378,14 @@ const Cart = (props) => {
                   if(props.item.userdata.user_id)
                   {
                     setRewardsButtonShow(false);
-                    setRewardsValue(props.item.userdata.rewards)
+                    getrewardvalue()
+                    if (props.item.userdata.rewards*rewardsv>=subtotalPrice()) {
+                      console.log("Reward amount **")
+                      setRewardsValue(subtotalPrice())
+                    } else {
+                     //console.log("Reward amount ")
+                     setRewardsValue(props.item.userdata.rewards*rewardsv)
+                    }
                   }
                   else
                   {
@@ -307,7 +410,7 @@ const Cart = (props) => {
                 onPress={() => {
                   if(props.item.userdata.user_id)
                   {
-                    props.navigation.navigate("PromocodeScreen")
+                    props.navigation.navigate("PromocodeScreen", {screen: "PromocodeScreen", params: {user_id: props.item.userdata.user_id, total_price: subtotalPrice()}})
                   }
                   else
                   {
@@ -331,8 +434,9 @@ const Cart = (props) => {
                                     <View 
                                         key={address.address_id}
                                         style={{width:"95%",marginLeft:"auto",marginRight:"auto",marginBottom:15}}>
+                            
                                         <Text style={{fontWeight:"bold"}}>Name:- {address.receiver_name}</Text>
-                                        <Text style={{color:"black"}}>Address:- {address.house_no}-{address.society},{address.landmark},{address.city},{address.state}-{address.pincode}</Text>
+                                        <Text style={{color:"black"}}>Address:- {addresss}</Text>
                                         <Text style={{color:"black"}}>Contact:- {address.receiver_phone}</Text>
                                     </View>);
                                 }
@@ -413,7 +517,9 @@ const Cart = (props) => {
                             marginBottom:5}}>Year</Text>
                         </View>
                         <View style={{flexDirection:"row",width:"95%",marginLeft:"auto",marginRight:"auto"}}>
-                          <Text style={{color:"#238A02",
+                          <Text 
+                          onPress={showDatepicker}
+                          style={{color:"#238A02",
                             fontSize:20,
                             flex:1,
                             textAlign:"center",
@@ -423,7 +529,9 @@ const Cart = (props) => {
                             borderTopWidth:1,
                             borderTopColor:"grey",
                             borderBottomColor:"grey"}}>{('0' + (date.getDate())).slice(-2)}</Text>
-                          <Text style={{color:"#238A02",
+                          <Text
+                          onPress={showDatepicker}
+                           style={{color:"#238A02",
                             fontSize:20,
                             flex:1,
                             textAlign:"center",
@@ -433,7 +541,9 @@ const Cart = (props) => {
                             borderTopWidth:1,
                             borderTopColor:"grey",
                             borderBottomColor:"grey"}}>{('0' + (date.getMonth()+1)).slice(-2)}</Text>
-                          <Text style={{color:"#238A02",
+                          <Text
+                          onPress={showDatepicker}
+                           style={{color:"#238A02",
                             fontSize:20,
                             flex:1,
                             textAlign:"center",
@@ -492,7 +602,7 @@ const Cart = (props) => {
 							<View style={{flexDirection: 'row', flexGrow: 1, flexShrink: 1, justifyContent: 'space-between', alignItems: 'center'}}>
 								<View style={{flexDirection: 'row', paddingRight: 20, alignItems: 'center'}}>
 									<Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>SubTotal: </Text>
-									<Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>${((subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue).toFixed(2)) > 0?(subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue).toFixed(2):0}</Text>
+									<Text style={{color: '#FFFFFF', fontWeight: 'bold'}}>${((subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue+TaxesPrice()).toFixed(2)) > 0?(subtotalPrice()+props.item.deliveryData.del_charge-couponCodeData.discount-rewardsValue+TaxesPrice()).toFixed(2):0}</Text>
 								</View>
                 <TouchableOpacity style={[styles.centerElement, {width: 100, height: 45, borderRadius: 5}]} 
                     onPress={() => {
@@ -512,7 +622,10 @@ const Cart = (props) => {
                             //console.log("data for getorderdetailsdata is :-"+JSON.stringify(data))
                             //props.getOrderDetailsData(data);
                             console.log(data);
-                            props.navigation.navigate("PaymentOptions", {screen: "PaymentOptions",params: {orderDetails:data, rewardsValue:rewardsValue}})
+                            if(addresss.length==0){
+                              Toast.show("Please Select Delivery Address")
+                            }
+                           else props.navigation.navigate("PaymentOptions", {screen: "PaymentOptions",params: {couponCodeData:couponCodeData,orderDetails:data, rewardsValue:rewardsValue}})
                           }
                         }
                         else
